@@ -1,0 +1,54 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prest Drop Report</title>
+<style>
+:root{--fg:#0a0a0a;--mut:#666;--line:#e5e5e5;--bg:#fff;--bar:#0a0a0a}
+body{margin:0;font:14px/1.45 -apple-system,Helvetica,Arial,sans-serif;color:var(--fg);background:var(--bg)}
+header{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+h1{font-size:18px;margin:0;letter-spacing:.02em}h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:26px 0 10px}
+main{padding:0 20px 40px;max-width:1100px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
+.kpi{border:1px solid var(--line);padding:14px}.kpi b{display:block;font-size:26px}.kpi span{color:var(--mut);font-size:12px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}td.num,th.num{text-align:right}
+.bar{height:8px;background:var(--bar);display:inline-block;vertical-align:middle;margin-right:6px}
+.mut{color:var(--mut)}.tag{display:inline-block;border:1px solid var(--line);padding:1px 6px;font-size:11px;margin-left:4px}
+input,select,button{font:inherit;padding:6px 8px;border:1px solid var(--line);background:#fff}button{cursor:pointer}
+.wrap{overflow-x:auto}#err{color:#b00020;padding:14px 0}
+.chart{display:flex;gap:2px;align-items:flex-end;height:120px;border-bottom:1px solid var(--line);margin-top:8px}.chart div{flex:1;background:#0a0a0a;min-width:4px;position:relative}.chart div i{position:absolute;bottom:100%;left:0;font-size:10px;color:var(--mut);font-style:normal;white-space:nowrap;display:none}.chart div:hover i{display:block}
+.legend{font-size:11px;color:var(--mut);margin-top:6px}
+</style></head><body>
+<header><h1>PREST · Drop-Anmeldungen</h1>
+<select id="days"><option value="1">Heute + gestern</option><option value="7">7 Tage</option><option value="14" selected>14 Tage</option><option value="30">30 Tage</option></select>
+<button id="reload">Aktualisieren</button><span id="stamp" class="mut"></span>
+<span style="flex:1"></span><input id="tok" placeholder="Zugangstoken" size="18" type="password"><button id="save">Speichern</button></header>
+<main>
+<div id="err" hidden></div>
+<div class="kpis" id="kpis"></div>
+<h2>Verlauf pro Tag (Anmeldungen)</h2><div class="chart" id="chartDay"></div><div class="legend" id="legDay"></div>
+<h2>Verlauf pro Stunde, letzte 48 h</h2><div class="chart" id="chartHour"></div><div class="legend">Balken = Anmeldungen je Stunde (Berlin)</div>
+<h2>Je Quelle</h2><div class="wrap"><table id="tChan"><thead><tr><th>Quelle</th><th class="num">Klicks Button</th><th class="num">Anmeldungen</th><th class="num">Quote</th><th>Anteil</th></tr></thead><tbody></tbody></table></div>
+<h2>Je Anzeige (Quelle › Kampagne › Anzeigengruppe › Anzeige)</h2><div class="wrap"><table id="tAds"><thead><tr><th>Quelle</th><th>Kampagne</th><th>Anzeigengruppe</th><th>Anzeige</th><th class="num">Klicks</th><th class="num">Anmeldungen</th><th class="num">exakt</th><th class="num">Quote</th></tr></thead><tbody></tbody></table></div>
+<h2>Letzte Anmeldungen</h2><div class="wrap"><table id="tRecent"><thead><tr><th>Zeit</th><th>Name</th><th>Tel</th><th>Sprache</th><th>Quelle</th><th>Kampagne / Anzeige</th><th>Sicherheit</th></tr></thead><tbody></tbody></table></div>
+<p class="mut" style="margin-top:28px">Quelle: eigene Middleware (Button-Klicks auf der Passwortseite + WhatsApp-Anmeldungen). "exakt" = Zuordnung ueber den Vorlagentext, "wahrscheinlich" = ueber den letzten Klick im 15-Minuten-Fenster. Anzeigenebene braucht utm_campaign / utm_term / utm_content in den Anzeigen-URLs.</p>
+</main>
+<script>
+const API='https://upammkefrgjsviaxbaun.supabase.co/functions/v1/drop-report';
+const $=s=>document.querySelector(s);
+function tok(){try{const h=new URLSearchParams(location.hash.slice(1)).get('token');if(h){localStorage.setItem('pdr_token',h);history.replaceState(null,'',location.pathname+location.search)}return localStorage.getItem('pdr_token')||''}catch(e){return ''}}
+$('#save').onclick=()=>{localStorage.setItem('pdr_token',$('#tok').value.trim());load()};$('#reload').onclick=load;$('#days').onchange=load;
+function fmtT(iso){return new Date(iso).toLocaleString('de-DE',{timeZone:'Europe/Berlin',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
+function esc(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+async function load(){const t=tok();if(!t){$('#err').hidden=false;$('#err').textContent='Bitte Zugangstoken eingeben (oben rechts).';return}
+ try{const r=await fetch(API+'?token='+encodeURIComponent(t)+'&days='+$('#days').value,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();render(d);$('#err').hidden=true;$('#stamp').textContent='Stand '+fmtT(d.generated_at)+' Uhr';}
+ catch(e){$('#err').hidden=false;$('#err').textContent='Fehler: '+e.message+(String(e.message).includes('401')?' (Token falsch?)':'')}}
+function render(d){const s=d.summary;const q=s.clicks_period?Math.round(s.signups_period/s.clicks_period*100):null;
+ $('#kpis').innerHTML=[['Anmeldungen gesamt',s.total_all_time],['Anmeldungen im Zeitraum',s.signups_period],['davon Deutsch',s.de],['davon Englisch',s.en],['Button-Klicks im Zeitraum',s.clicks_period],['Klick zu Anmeldung',q===null?'–':q+' %']].map(([k,v])=>`<div class="kpi"><b>${v}</b><span>${k}</span></div>`).join('');
+ const days=Object.keys(d.by_day).sort();const mx=Math.max(1,...days.map(k=>d.by_day[k].signups));
+ $('#chartDay').innerHTML=days.map(k=>`<div style="height:${Math.round(d.by_day[k].signups/mx*100)}%"><i>${k.slice(5)}: ${d.by_day[k].signups} (DE ${d.by_day[k].de} / EN ${d.by_day[k].en}), Klicks ${d.by_day[k].clicks}</i></div>`).join('');
+ $('#legDay').textContent=days.map(k=>k.slice(8)+'.'+k.slice(5,7)+': '+d.by_day[k].signups).join(' · ');
+ const hrs=Object.keys(d.by_hour).sort();const mh=Math.max(1,...hrs.map(k=>d.by_hour[k].signups));
+ $('#chartHour').innerHTML=hrs.map(k=>`<div style="height:${Math.round(d.by_hour[k].signups/mh*100)}%"><i>${k.slice(5).replace('T',' ')}h: ${d.by_hour[k].signups} Anm., ${d.by_hour[k].clicks} Klicks</i></div>`).join('');
+ const ch=Object.entries(d.by_channel).sort((a,b)=>b[1].signups-a[1].signups);const tot=Math.max(1,ch.reduce((a,[,v])=>a+v.signups,0));
+ $('#tChan tbody').innerHTML=ch.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="num">${v.clicks}</td><td class="num"><b>${v.signups}</b></td><td class="num">${v.clicks?Math.round(v.signups/v.clicks*100)+' %':'–'}</td><td><span class="bar" style="width:${Math.round(v.signups/tot*160)}px"></span>${Math.round(v.signups/tot*100)} %</td></tr>`).join('');
+ $('#tAds tbody').innerHTML=d.breakdown.map(r=>`<tr><td>${esc(r.channel)}</td><td>${esc(r.campaign)||'<span class=mut>–</span>'}</td><td>${esc(r.adset)||'<span class=mut>–</span>'}</td><td>${esc(r.ad)||'<span class=mut>–</span>'}</td><td class="num">${r.clicks}</td><td class="num"><b>${r.signups}</b></td><td class="num">${r.exact}</td><td class="num">${r.rate===null?'–':r.rate+' %'}</td></tr>`).join('')||'<tr><td colspan=8 class=mut>Noch keine Daten</td></tr>';
+ $('#tRecent tbody').innerHTML=d.recent.map(x=>`<tr><td>${fmtT(x.at)}</td><td>${esc(x.name)}</td><td>${esc(x.tel)}</td><td>${x.lang}</td><td>${esc(x.channel)}</td><td>${[x.campaign,x.adset,x.ad].filter(Boolean).map(esc).join(' › ')||'<span class=mut>–</span>'}</td><td><span class="tag">${esc(x.confidence)}</span></td></tr>`).join('');}
+load();setInterval(load,60000);
+</script></body></html>
