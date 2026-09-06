@@ -1,54 +1,165 @@
 <!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prest Drop Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--fg:#0a0a0a;--mut:#666;--line:#e5e5e5;--bg:#fff;--bar:#0a0a0a}
-body{margin:0;font:14px/1.45 -apple-system,Helvetica,Arial,sans-serif;color:var(--fg);background:var(--bg)}
-header{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:center;flex-wrap:wrap}
-h1{font-size:18px;margin:0;letter-spacing:.02em}h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:26px 0 10px}
-main{padding:0 20px 40px;max-width:1100px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:18px}
-.kpi{border:1px solid var(--line);padding:14px}.kpi b{display:block;font-size:26px}.kpi span{color:var(--mut);font-size:12px}
-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}td.num,th.num{text-align:right}
-.bar{height:8px;background:var(--bar);display:inline-block;vertical-align:middle;margin-right:6px}
-.mut{color:var(--mut)}.tag{display:inline-block;border:1px solid var(--line);padding:1px 6px;font-size:11px;margin-left:4px}
-input,select,button{font:inherit;padding:6px 8px;border:1px solid var(--line);background:#fff}button{cursor:pointer}
-.wrap{overflow-x:auto}#err{color:#b00020;padding:14px 0}
-.chart{display:flex;gap:2px;align-items:flex-end;height:120px;border-bottom:1px solid var(--line);margin-top:8px}.chart div{flex:1;background:#0a0a0a;min-width:4px;position:relative}.chart div i{position:absolute;bottom:100%;left:0;font-size:10px;color:var(--mut);font-style:normal;white-space:nowrap;display:none}.chart div:hover i{display:block}
-.legend{font-size:11px;color:var(--mut);margin-top:6px}
+:root{--ink:#0b0b0b;--ink2:#3a3a3a;--mut:#7a7873;--line:#e4e2dc;--ground:#f4f3ef;--card:#ffffff;--live:#1f9d55;--warn:#b54708;--en:#8a8880;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--sans:"IBM Plex Sans",-apple-system,Helvetica,Arial,sans-serif}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;font:14px/1.5 var(--sans);color:var(--ink);background:var(--ground);background-image:radial-gradient(circle at 1px 1px,rgba(0,0,0,.045) 1px,transparent 0);background-size:22px 22px}
+a{color:inherit}
+.top{position:sticky;top:0;z-index:5;background:rgba(244,243,239,.88);backdrop-filter:saturate(1.2) blur(10px);-webkit-backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1180px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.brand h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
+.brand span{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.06em}
+.seg{display:inline-flex;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:6px;font:inherit;font-size:13px;color:var(--ink2);cursor:pointer;transition:background .15s,color .15s}
+.seg button:hover{background:var(--ground)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.custom{display:none;align-items:center;gap:6px}.custom.on{display:inline-flex}
+input[type=date],input[type=password],input[type=search]{font:inherit;font-size:13px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
+input:focus{outline:2px solid var(--ink);outline-offset:1px}
+.btn{font:inherit;font-size:13px;padding:7px 12px;border:1px solid var(--ink);border-radius:6px;background:var(--ink);color:#fff;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.live{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.04em}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--live);box-shadow:0 0 0 0 rgba(31,157,85,.5);animation:pulse 2s infinite}
+.live.off i{background:var(--warn);animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(31,157,85,.45)}70%{box-shadow:0 0 0 8px rgba(31,157,85,0)}100%{box-shadow:0 0 0 0 rgba(31,157,85,0)}}
+.ring{width:18px;height:18px;transform:rotate(-90deg)}.ring circle{fill:none;stroke-width:2.5}.ring .bg{stroke:var(--line)}.ring .fg{stroke:var(--ink);stroke-dasharray:44;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.gear{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:6px 9px;cursor:pointer;font:inherit;font-size:12px;color:var(--ink2)}
+.pop{display:none;position:absolute;right:20px;top:54px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.12);gap:8px;z-index:6}.pop.on{display:flex}
+main{max-width:1180px;margin:0 auto;padding:22px 20px 60px}
+.period{display:flex;align-items:baseline;gap:12px;margin:2px 0 18px;flex-wrap:wrap}
+.period b{font-size:22px;font-weight:500;letter-spacing:-.01em}.period span{font-family:var(--mono);font-size:12px;color:var(--mut)}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+@media(max-width:980px){.kpis{grid-template-columns:repeat(3,1fr)}}@media(max-width:560px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;animation:rise .5s both}
+.kpi:nth-child(2){animation-delay:.05s}.kpi:nth-child(3){animation-delay:.1s}.kpi:nth-child(4){animation-delay:.15s}.kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.25s}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.kpi label{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.kpi b{display:block;font-family:var(--mono);font-weight:500;font-size:28px;line-height:1.15;margin-top:6px;letter-spacing:-.02em}
+.kpi small{font-family:var(--mono);font-size:11px;color:var(--mut)}
+.kpi.hero{background:var(--ink);color:#fff;border-color:var(--ink)}.kpi.hero label,.kpi.hero small{color:#b9b7b0}
+.delta{position:absolute;right:12px;top:12px;font-family:var(--mono);font-size:11px;color:var(--live);background:rgba(31,157,85,.1);padding:2px 7px;border-radius:99px;opacity:0;transition:opacity .3s}.delta.on{opacity:1}
+.grid2{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin-top:14px}@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-top:14px}
+.card header{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.card h2{margin:0;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);font-weight:600}
+.card header span{font-family:var(--mono);font-size:11px;color:var(--mut)}
+.chart{position:relative;height:150px}
+.chart svg{width:100%;height:100%;display:block;overflow:visible}
+.chart rect{transition:opacity .15s}.chart g:hover rect{opacity:.75}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;padding:6px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .1s}
+.axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--mut);margin-top:6px}
+.leg{font-family:var(--mono);font-size:10px;color:var(--mut);display:flex;gap:14px;margin-top:8px}.leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:500;white-space:nowrap;cursor:pointer;user-select:none}
+th.sort::after{content:" ↓";color:var(--ink)}th.sort.asc::after{content:" ↑"}
+td.num,th.num{text-align:right;font-family:var(--mono);font-size:12.5px}
+tr:last-child td{border-bottom:0}tbody tr:hover td{background:var(--ground)}
+tr.new td{animation:flash 2.4s both}@keyframes flash{0%{background:rgba(31,157,85,.18)}100%{background:transparent}}
+.bar{height:6px;background:var(--ink);display:inline-block;vertical-align:middle;margin-right:8px;border-radius:3px}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:99px;border:1px solid var(--line);color:var(--ink2)}
+.tag.ex{background:var(--ink);color:#fff;border-color:var(--ink)}
+.src{display:inline-flex;align-items:center;gap:7px}.src i{width:8px;height:8px;border-radius:2px;background:var(--ink)}
+.src.meta i{background:#0866ff}.src.google i{background:#ea4335}.src.tiktok i{background:#111;outline:2px solid #25f4ee;outline-offset:-3px}.src.website i{background:#a3a19a}.src.direct i{background:#d4d2cb}
+.mut{color:var(--mut)}.empty{padding:22px;text-align:center;color:var(--mut);font-size:13px}
+#err{display:none;background:#fff4ec;border:1px solid #f3c9a7;color:var(--warn);padding:12px 14px;border-radius:8px;margin-bottom:14px}#err.on{display:block}
+.foot{font-size:12px;color:var(--mut);margin-top:28px;line-height:1.6}
+.skel{background:linear-gradient(90deg,var(--line) 25%,var(--card) 50%,var(--line) 75%);background-size:200% 100%;animation:sk 1.2s infinite;border-radius:4px;height:14px}
+@keyframes sk{to{background-position:-200% 0}}
 </style></head><body>
-<header><h1>PREST · Drop-Anmeldungen</h1>
-<select id="days"><option value="1">Heute + gestern</option><option value="7">7 Tage</option><option value="14" selected>14 Tage</option><option value="30">30 Tage</option></select>
-<button id="reload">Aktualisieren</button><span id="stamp" class="mut"></span>
-<span style="flex:1"></span><input id="tok" placeholder="Zugangstoken" size="18" type="password"><button id="save">Speichern</button></header>
+<div class="top"><div class="in">
+ <div class="brand"><h1>Prest</h1><span>Drop-Reporting</span></div>
+ <div class="seg" id="seg" role="group" aria-label="Zeitraum">
+  <button data-r="today">Heute</button><button data-r="yesterday">Gestern</button><button data-r="7">7 Tage</button><button data-r="30">30 Tage</button><button data-r="custom">Zeitraum</button>
+ </div>
+ <div class="custom" id="custom"><input type="date" id="from" aria-label="Von"><span class="mut">bis</span><input type="date" id="to" aria-label="Bis"><button class="btn" id="apply">Anzeigen</button></div>
+ <div class="live" id="live"><i></i><span id="liveTxt">Live</span><svg class="ring" viewBox="0 0 18 18"><circle class="bg" cx="9" cy="9" r="7"/><circle class="fg" id="ringFg" cx="9" cy="9" r="7"/></svg></div>
+ <button class="gear" id="gear" aria-label="Einstellungen">Zugang</button>
+ <div class="pop" id="pop"><input id="tok" placeholder="Zugangstoken" type="password" autocomplete="off"><button class="btn" id="save">Speichern</button></div>
+</div></div>
 <main>
-<div id="err" hidden></div>
-<div class="kpis" id="kpis"></div>
-<h2>Verlauf pro Tag (Anmeldungen)</h2><div class="chart" id="chartDay"></div><div class="legend" id="legDay"></div>
-<h2>Verlauf pro Stunde, letzte 48 h</h2><div class="chart" id="chartHour"></div><div class="legend">Balken = Anmeldungen je Stunde (Berlin)</div>
-<h2>Je Quelle</h2><div class="wrap"><table id="tChan"><thead><tr><th>Quelle</th><th class="num">Klicks Button</th><th class="num">Anmeldungen</th><th class="num">Quote</th><th>Anteil</th></tr></thead><tbody></tbody></table></div>
-<h2>Je Anzeige (Quelle › Kampagne › Anzeigengruppe › Anzeige)</h2><div class="wrap"><table id="tAds"><thead><tr><th>Quelle</th><th>Kampagne</th><th>Anzeigengruppe</th><th>Anzeige</th><th class="num">Klicks</th><th class="num">Anmeldungen</th><th class="num">exakt</th><th class="num">Quote</th></tr></thead><tbody></tbody></table></div>
-<h2>Letzte Anmeldungen</h2><div class="wrap"><table id="tRecent"><thead><tr><th>Zeit</th><th>Name</th><th>Tel</th><th>Sprache</th><th>Quelle</th><th>Kampagne / Anzeige</th><th>Sicherheit</th></tr></thead><tbody></tbody></table></div>
-<p class="mut" style="margin-top:28px">Quelle: eigene Middleware (Button-Klicks auf der Passwortseite + WhatsApp-Anmeldungen). "exakt" = Zuordnung ueber den Vorlagentext, "wahrscheinlich" = ueber den letzten Klick im 15-Minuten-Fenster. Anzeigenebene braucht utm_campaign / utm_term / utm_content in den Anzeigen-URLs.</p>
+ <div id="err" role="alert"></div>
+ <div class="period"><b id="pTitle">Lade …</b><span id="pSub"></span><span id="hid" class="mut" style="font-family:var(--mono);font-size:12px"></span></div>
+ <div class="kpis" id="kpis">
+  <div class="kpi hero"><label>Anmeldungen gesamt</label><b><span class="skel" style="width:60px;display:inline-block"></span></b></div>
+  <div class="kpi"><label>Im Zeitraum</label><b>&nbsp;</b></div><div class="kpi"><label>Deutsch</label><b>&nbsp;</b></div><div class="kpi"><label>Englisch</label><b>&nbsp;</b></div><div class="kpi"><label>Button-Klicks</label><b>&nbsp;</b></div><div class="kpi"><label>Klick zu Anmeldung</label><b>&nbsp;</b></div>
+ </div>
+ <div class="grid2">
+  <div class="card" style="margin:0"><header><h2>Anmeldungen pro Tag</h2><span id="dayNote"></span></header><div class="chart" id="cDay"></div><div class="axis" id="aDay"></div><div class="leg"><span><i style="background:var(--ink)"></i>Deutsch</span><span><i style="background:var(--en)"></i>Englisch</span></div></div>
+  <div class="card" style="margin:0"><header><h2>Pro Stunde</h2><span id="hourNote"></span></header><div class="chart" id="cHour"></div><div class="axis" id="aHour"></div><div class="leg"><span><i style="background:var(--ink)"></i>Anmeldungen</span><span><i style="background:var(--line)"></i>Klicks</span></div></div>
+ </div>
+ <div class="card"><header><h2>Je Quelle</h2><span>Klicks auf den WhatsApp-Button und daraus entstandene Anmeldungen</span></header>
+  <div class="wrap"><table id="tChan"><thead><tr><th>Quelle</th><th class="num">Klicks</th><th class="num">Anmeldungen</th><th class="num">Quote</th><th>Anteil an Anmeldungen</th></tr></thead><tbody></tbody></table></div></div>
+ <div class="card"><header><h2>Je Anzeige</h2><span id="adNote">Quelle · Kampagne · Anzeigengruppe · Anzeige</span><input type="search" id="q" placeholder="Filtern …" style="margin-left:auto;min-width:180px"></header>
+  <div class="wrap"><table id="tAds"><thead><tr><th data-k="channel">Quelle</th><th data-k="campaign">Kampagne</th><th data-k="adset">Anzeigengruppe</th><th data-k="ad">Anzeige</th><th class="num" data-k="clicks">Klicks</th><th class="num sort" data-k="signups">Anmeldungen</th><th class="num" data-k="exact">exakt</th><th class="num" data-k="rate">Quote</th></tr></thead><tbody></tbody></table></div></div>
+ <div class="card"><header><h2>Letzte Anmeldungen</h2><span>neueste zuerst, Daten maskiert</span></header>
+  <div class="wrap"><table id="tRecent"><thead><tr><th>Zeit</th><th>Name</th><th>Tel</th><th>Sprache</th><th>Quelle</th><th>Kampagne · Anzeigengruppe · Anzeige</th><th>Zuordnung</th></tr></thead><tbody></tbody></table></div></div>
+ <p class="foot">Daten aus der eigenen Middleware: Klicks auf den WhatsApp-Button der Passwortseite und WhatsApp-Anmeldungen. Zuordnung "exakt" = ueber den Vorlagentext, "wahrscheinlich" = letzter Klick im 15-Minuten-Fenster. Google liefert nur IDs, die Namen werden ueber die Anzeigen-Namensliste aufgeloest (<span id="gNames">–</span>). Zeiten Europe/Berlin. Aktualisierung alle 30 Sekunden.</p>
 </main>
 <script>
 const API='https://upammkefrgjsviaxbaun.supabase.co/functions/v1/drop-report';
-const $=s=>document.querySelector(s);
-function tok(){try{const h=new URLSearchParams(location.hash.slice(1)).get('token');if(h){localStorage.setItem('pdr_token',h);history.replaceState(null,'',location.pathname+location.search)}return localStorage.getItem('pdr_token')||''}catch(e){return ''}}
-$('#save').onclick=()=>{localStorage.setItem('pdr_token',$('#tok').value.trim());load()};$('#reload').onclick=load;$('#days').onchange=load;
-function fmtT(iso){return new Date(iso).toLocaleString('de-DE',{timeZone:'Europe/Berlin',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
-function esc(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-async function load(){const t=tok();if(!t){$('#err').hidden=false;$('#err').textContent='Bitte Zugangstoken eingeben (oben rechts).';return}
- try{const r=await fetch(API+'?token='+encodeURIComponent(t)+'&days='+$('#days').value,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();render(d);$('#err').hidden=true;$('#stamp').textContent='Stand '+fmtT(d.generated_at)+' Uhr';}
- catch(e){$('#err').hidden=false;$('#err').textContent='Fehler: '+e.message+(String(e.message).includes('401')?' (Token falsch?)':'')}}
-function render(d){const s=d.summary;const q=s.clicks_period?Math.round(s.signups_period/s.clicks_period*100):null;
- $('#kpis').innerHTML=[['Anmeldungen gesamt',s.total_all_time],['Anmeldungen im Zeitraum',s.signups_period],['davon Deutsch',s.de],['davon Englisch',s.en],['Button-Klicks im Zeitraum',s.clicks_period],['Klick zu Anmeldung',q===null?'–':q+' %']].map(([k,v])=>`<div class="kpi"><b>${v}</b><span>${k}</span></div>`).join('');
- const days=Object.keys(d.by_day).sort();const mx=Math.max(1,...days.map(k=>d.by_day[k].signups));
- $('#chartDay').innerHTML=days.map(k=>`<div style="height:${Math.round(d.by_day[k].signups/mx*100)}%"><i>${k.slice(5)}: ${d.by_day[k].signups} (DE ${d.by_day[k].de} / EN ${d.by_day[k].en}), Klicks ${d.by_day[k].clicks}</i></div>`).join('');
- $('#legDay').textContent=days.map(k=>k.slice(8)+'.'+k.slice(5,7)+': '+d.by_day[k].signups).join(' · ');
- const hrs=Object.keys(d.by_hour).sort();const mh=Math.max(1,...hrs.map(k=>d.by_hour[k].signups));
- $('#chartHour').innerHTML=hrs.map(k=>`<div style="height:${Math.round(d.by_hour[k].signups/mh*100)}%"><i>${k.slice(5).replace('T',' ')}h: ${d.by_hour[k].signups} Anm., ${d.by_hour[k].clicks} Klicks</i></div>`).join('');
+const $=s=>document.querySelector(s);const $$=s=>[...document.querySelectorAll(s)];
+const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+function tok(){try{const h=new URLSearchParams(location.hash.slice(1)).get('token');if(h){LS('pdr_token',h);history.replaceState(null,'',location.pathname+location.search)}}catch(e){}return LS('pdr_token')||''}
+const fmtT=iso=>new Date(iso).toLocaleString('de-DE',{timeZone:'Europe/Berlin',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+const fmtD=d=>d.slice(8)+'.'+d.slice(5,7)+'.'+d.slice(0,4);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const n=v=>Number(v||0).toLocaleString('de-DE');
+const srcKey=l=>({'Meta Ads':'meta','Google Ads':'google','TikTok Ads':'tiktok','Website/organisch':'website','Direkt':'direct'})[l]||'other';
+const srcCell=l=>`<span class="src ${srcKey(l)}"><i></i>${esc(l)}</span>`;
+// Zeitraum
+let range=LS('pdr_range')||'7',from=LS('pdr_from')||'',to=LS('pdr_to')||'';
+function setRange(r){range=r;LS('pdr_range',r);$$('#seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===r));$('#custom').classList.toggle('on',r==='custom');if(r!=='custom')load(true)}
+$$('#seg button').forEach(b=>b.onclick=()=>setRange(b.dataset.r));
+$('#apply').onclick=()=>{from=$('#from').value;to=$('#to').value;if(!from||!to)return;LS('pdr_from',from);LS('pdr_to',to);load(true)};
+$('#from').value=from;$('#to').value=to;
+$('#gear').onclick=()=>$('#pop').classList.toggle('on');$('#save').onclick=()=>{LS('pdr_token',$('#tok').value.trim());$('#pop').classList.remove('on');load(true)};
+// Live-Refresh
+const EVERY=30;let left=EVERY,last=null,busy=false;
+setInterval(()=>{left--;$('#ringFg').style.strokeDashoffset=44*(1-left/EVERY);if(left<=0){left=EVERY;load()}},1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)load()});
+function query(){const t=tok();if(!t)return null;let q='?token='+encodeURIComponent(t);if(range==='custom'&&from&&to)q+='&from='+from+'&to='+to;else q+='&range='+(range==='custom'?'7':range);return q}
+async function load(reset){if(busy)return;const q=query();if(!q){err('Zugangstoken fehlt. Oben rechts unter "Zugang" eintragen.');return}
+ busy=true;try{const r=await fetch(API+q,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();render(d,reset);err('');$('#live').classList.remove('off');$('#liveTxt').textContent='Live · '+new Date(d.generated_at).toLocaleTimeString('de-DE',{timeZone:'Europe/Berlin',hour:'2-digit',minute:'2-digit',second:'2-digit'});left=EVERY}
+ catch(e){err('Keine Verbindung: '+e.message+(String(e.message).includes('401')?' (Token falsch?)':''));$('#live').classList.add('off');$('#liveTxt').textContent='Verbindung gestoert'}finally{busy=false}}
+function err(m){const e=$('#err');e.textContent=m;e.classList.toggle('on',!!m)}
+function tip(el,x,y,html){let t=el.querySelector('.tip');if(!t){t=document.createElement('div');t.className='tip';el.appendChild(t)}t.innerHTML=html;t.style.left=x+'px';t.style.top=y+'px';t.style.opacity=1}
+function untip(el){const t=el.querySelector('.tip');if(t)t.style.opacity=0}
+function bars(el,items,stack){ // items:[{label,a,b,tip}] a=dunkel b=hell; stack=true: gestapelt, sonst nebeneinander
+ const W=1000,H=150,g=items.length>40?1:items.length>20?2:4,bw=(W-g*(items.length-1))/Math.max(items.length,1);const mx=Math.max(1,...items.map(i=>stack?i.a+i.b:Math.max(i.a,i.b)));
+ el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${items.map((it,i)=>{const x=i*(bw+g);const ha=it.a/mx*H,hb=it.b/mx*H;return stack
+  ?`<g data-i="${i}"><rect x="${x}" y="0" width="${bw}" height="${H}" fill="transparent"/><rect x="${x}" y="${H-ha-hb}" width="${bw}" height="${hb}" fill="#8a8880" rx="1"/><rect x="${x}" y="${H-ha}" width="${bw}" height="${ha}" fill="#0b0b0b" rx="1"/></g>`
+  :`<g data-i="${i}"><rect x="${x}" y="0" width="${bw}" height="${H}" fill="transparent"/><rect x="${x}" y="${H-hb}" width="${bw}" height="${hb}" fill="#e4e2dc" rx="1"/><rect x="${x}" y="${H-ha}" width="${bw}" height="${ha}" fill="#0b0b0b" rx="1"/></g>`}).join('')}</svg>`;
+ el.querySelectorAll('g').forEach(gEl=>{gEl.onmousemove=e=>{const it=items[+gEl.dataset.i];const r=el.getBoundingClientRect();tip(el,e.clientX-r.left,e.clientY-r.top-8,it.tip)};gEl.onmouseleave=()=>untip(el)});}
+let ads=[],sortK='signups',sortAsc=false;
+function render(d,reset){const s=d.summary;const q=s.clicks_period?Math.round(s.signups_period/s.clicks_period*100):null;
+ const title={today:'Heute',yesterday:'Gestern','7':'Letzte 7 Tage','30':'Letzte 30 Tage'}[range]||'Zeitraum';
+ $('#pTitle').textContent=title;$('#pSub').textContent=(d.from===d.to?fmtD(d.from):fmtD(d.from)+' bis '+fmtD(d.to))+' · '+d.days+(d.days===1?' Tag':' Tage');
+ const delta=last&&!reset&&s.total_all_time>last.total?s.total_all_time-last.total:0;
+ $('#kpis').innerHTML=[['Anmeldungen gesamt',n(s.total_all_time),'seit Tracking-Start '+fmtT(d.tracking_since)+' Uhr',1],['Im Zeitraum',n(s.signups_period),'Anmeldungen'],['Deutsch',n(s.de),s.signups_period?Math.round(s.de/s.signups_period*100)+' %':''],['Englisch',n(s.en),s.signups_period?Math.round(s.en/s.signups_period*100)+' %':''],['Button-Klicks',n(s.clicks_period),'WhatsApp-Button'],['Klick zu Anmeldung',q===null?'–':q+' %','Konversion']]
+  .map(([k,v,sub,hero])=>`<div class="kpi${hero?' hero':''}"><label>${k}</label><b>${v}</b><small>${sub}</small>${hero&&delta?`<span class="delta on">+${delta} neu</span>`:''}</div>`).join('');
+ // Tage
+ const days=Object.keys(d.by_day).sort();bars($('#cDay'),days.map(k=>({a:d.by_day[k].de,b:d.by_day[k].en,tip:`${fmtD(k)} · ${d.by_day[k].signups} Anm. (DE ${d.by_day[k].de} / EN ${d.by_day[k].en}) · ${d.by_day[k].clicks} Klicks`})),true);
+ $('#aDay').innerHTML=days.length>1?`<span>${fmtD(days[0])}</span><span>${fmtD(days[days.length-1])}</span>`:`<span>${fmtD(days[0]||d.from)}</span>`;$('#dayNote').textContent=days.length+(days.length===1?' Tag':' Tage');
+ // Stunden
+ const hrs=Object.keys(d.by_hour).sort();bars($('#cHour'),hrs.map(k=>({a:d.by_hour[k].signups,b:d.by_hour[k].clicks,tip:`${fmtD(k.slice(0,10))} ${k.slice(11)}:00 · ${d.by_hour[k].signups} Anm. · ${d.by_hour[k].clicks} Klicks`})),false);
+ $('#aHour').innerHTML=hrs.length?`<span>${hrs[0].slice(11)}:00 (${fmtD(hrs[0].slice(0,10)).slice(0,6)})</span><span>${hrs[hrs.length-1].slice(11)}:00</span>`:'';$('#hourNote').textContent=d.hours_mode==='48h'?'letzte 48 Stunden':'gewaehlter Zeitraum';
+ // Quellen
  const ch=Object.entries(d.by_channel).sort((a,b)=>b[1].signups-a[1].signups);const tot=Math.max(1,ch.reduce((a,[,v])=>a+v.signups,0));
- $('#tChan tbody').innerHTML=ch.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="num">${v.clicks}</td><td class="num"><b>${v.signups}</b></td><td class="num">${v.clicks?Math.round(v.signups/v.clicks*100)+' %':'–'}</td><td><span class="bar" style="width:${Math.round(v.signups/tot*160)}px"></span>${Math.round(v.signups/tot*100)} %</td></tr>`).join('');
- $('#tAds tbody').innerHTML=d.breakdown.map(r=>`<tr><td>${esc(r.channel)}</td><td>${esc(r.campaign)||'<span class=mut>–</span>'}</td><td>${esc(r.adset)||'<span class=mut>–</span>'}</td><td>${esc(r.ad)||'<span class=mut>–</span>'}</td><td class="num">${r.clicks}</td><td class="num"><b>${r.signups}</b></td><td class="num">${r.exact}</td><td class="num">${r.rate===null?'–':r.rate+' %'}</td></tr>`).join('')||'<tr><td colspan=8 class=mut>Noch keine Daten</td></tr>';
- $('#tRecent tbody').innerHTML=d.recent.map(x=>`<tr><td>${fmtT(x.at)}</td><td>${esc(x.name)}</td><td>${esc(x.tel)}</td><td>${x.lang}</td><td>${esc(x.channel)}</td><td>${[x.campaign,x.adset,x.ad].filter(Boolean).map(esc).join(' › ')||'<span class=mut>–</span>'}</td><td><span class="tag">${esc(x.confidence)}</span></td></tr>`).join('');}
-load();setInterval(load,60000);
+ $('#tChan tbody').innerHTML=ch.map(([k,v])=>`<tr><td>${srcCell(k)}</td><td class="num">${n(v.clicks)}</td><td class="num"><b>${n(v.signups)}</b></td><td class="num">${v.clicks?Math.round(v.signups/v.clicks*100)+' %':'–'}</td><td><span class="bar" style="width:${Math.round(v.signups/tot*140)}px"></span><span class="mono">${Math.round(v.signups/tot*100)} %</span></td></tr>`).join('')||`<tr><td colspan=5 class="empty">Noch keine Daten im Zeitraum</td></tr>`;
+ ads=d.breakdown;drawAds();
+ // Letzte
+ const seen=new Set(last?last.recent:[]);
+ $('#tRecent tbody').innerHTML=d.recent.map(x=>{const id=x.at+x.tel;const isNew=last&&!reset&&!seen.has(id);return`<tr${isNew?' class="new"':''}><td class="num" style="text-align:left">${fmtT(x.at)}</td><td>${esc(x.name)}</td><td class="num" style="text-align:left">${esc(x.tel)}</td><td><span class="tag">${x.lang}</span></td><td>${srcCell(x.channel)}</td><td>${[x.campaign,x.adset,x.ad].filter(Boolean).map(esc).join(' <span class=mut>·</span> ')||'<span class=mut>–</span>'}</td><td><span class="tag${x.confidence==='exakt'?' ex':''}">${esc(x.confidence)}</span></td></tr>`}).join('')||`<tr><td colspan=7 class="empty">Noch keine Anmeldungen im Zeitraum</td></tr>`;
+ $('#hid').textContent=d.hidden_unknown?` · ${d.hidden_unknown} ohne Zuordnung ausgeblendet`:'';$('#gNames').textContent=(d.names_known&&d.names_known.google?d.names_known.google+' Google-Namen bekannt':'Google-Namen noch nicht geladen');
+ last={total:s.total_all_time,recent:d.recent.map(x=>x.at+x.tel)};}
+function drawAds(){const f=($('#q').value||'').toLowerCase();let rows=ads.filter(r=>!f||[r.channel,r.campaign,r.adset,r.ad].join(' ').toLowerCase().includes(f));
+ rows.sort((a,b)=>{const x=a[sortK]??'',y=b[sortK]??'';const c=typeof x==='number'||typeof y==='number'?(Number(x)||0)-(Number(y)||0):String(x).localeCompare(String(y),'de');return sortAsc?c:-c});
+ $('#tAds tbody').innerHTML=rows.map(r=>`<tr><td>${srcCell(r.channel)}</td><td>${esc(r.campaign)||'<span class=mut>–</span>'}</td><td>${esc(r.adset)||'<span class=mut>–</span>'}</td><td>${esc(r.ad)||'<span class=mut>–</span>'}</td><td class="num">${n(r.clicks)}</td><td class="num"><b>${n(r.signups)}</b></td><td class="num">${n(r.exact)}</td><td class="num">${r.rate===null?'–':r.rate+' %'}</td></tr>`).join('')||`<tr><td colspan=8 class="empty">${f?'Kein Treffer':'Noch keine Klicks oder Anmeldungen mit Anzeigen-Parametern'}</td></tr>`;
+ $$('#tAds th').forEach(t=>{t.classList.toggle('sort',t.dataset.k===sortK);t.classList.toggle('asc',t.dataset.k===sortK&&sortAsc)})}
+$('#q').oninput=drawAds;$$('#tAds th').forEach(t=>t.onclick=()=>{if(sortK===t.dataset.k)sortAsc=!sortAsc;else{sortK=t.dataset.k;sortAsc=['channel','campaign','adset','ad'].includes(sortK)}drawAds()});
+setRange(range);if(range==='custom')load(true);
 </script></body></html>
