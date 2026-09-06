@@ -77,7 +77,7 @@ tr.new td{animation:flash 2.4s both}@keyframes flash{0%{background:rgba(31,157,8
  .top .in{padding:10px 14px;gap:8px}.brand{width:100%;justify-content:space-between}.brand span{font-size:10px}
  .seg{width:100%;display:flex}.seg button{flex:1;padding:10px 2px;font-size:12.5px;min-height:40px}
  .custom.on{width:100%;display:grid;grid-template-columns:1fr auto 1fr;gap:6px}.custom .btn{grid-column:1/-1;min-height:44px}
- .live{width:100%;justify-content:space-between}.gear{position:absolute;right:14px;top:10px}
+ .live{width:100%;justify-content:space-between}
  main{padding:14px 14px 70px}.period{margin:0 0 12px}.period b{font-size:19px}
  .kpis{gap:8px}.kpi{padding:12px 12px;border-radius:8px}.kpi b{font-size:24px}.kpi label{font-size:10px}
  .grid2{gap:10px;margin-top:10px}.card{padding:12px 12px;margin-top:10px;border-radius:8px}.card header{margin-bottom:6px}.card header span{font-size:10px}
@@ -105,13 +105,13 @@ tr.new td{animation:flash 2.4s both}@keyframes flash{0%{background:rgba(31,157,8
 </style></head><body>
 <div id="gate" hidden><div class="g"><h1>Prest</h1><p>Drop-Reporting · Echtzeit</p><label for="gtok">Zugangstoken</label><input id="gtok" type="password" autocomplete="off" placeholder="Token eingeben" inputmode="text"><button class="btn" id="gopen">Reporting oeffnen</button><div class="bad" id="gbad">Token wird nicht akzeptiert. Bitte pruefen.</div><div class="hint">Der Link mit Token steht in Telegram. Einmal oeffnen, danach merkt sich dieses Geraet den Zugang.</div></div></div>
 <div class="top" id="top"><div class="in">
- <div class="brand"><h1>Prest</h1><span>Drop-Reporting</span></div>
+ <div class="brand"><h1>Prest</h1><span>Reporting · Echtzeit</span></div>
  <div class="seg" id="seg" role="group" aria-label="Zeitraum">
   <button data-r="today">Heute</button><button data-r="yesterday">Gestern</button><button data-r="7">7 Tage</button><button data-r="30">30 Tage</button><button data-r="custom">Zeitraum</button>
  </div>
  <div class="custom" id="custom"><input type="date" id="from" aria-label="Von"><span class="mut">bis</span><input type="date" id="to" aria-label="Bis"><button class="btn" id="apply">Anzeigen</button></div>
  <div class="live" id="live"><i></i><span id="liveTxt">Live</span><svg class="ring" viewBox="0 0 18 18"><circle class="bg" cx="9" cy="9" r="7"/><circle class="fg" id="ringFg" cx="9" cy="9" r="7"/></svg></div>
- <button class="gear" id="gear" aria-label="Einstellungen">Zugang</button>
+ <button class="gear" id="gear" aria-label="Zugang aendern" hidden>Zugang</button>
  <div class="pop" id="pop"><input id="tok" placeholder="Zugangstoken" type="password" autocomplete="off"><button class="btn" id="save">Speichern</button></div>
 </div></div>
 <main>
@@ -131,7 +131,7 @@ tr.new td{animation:flash 2.4s both}@keyframes flash{0%{background:rgba(31,157,8
   <div class="wrap"><table id="tAds"><thead><tr><th data-k="channel">Quelle</th><th data-k="campaign">Kampagne</th><th data-k="adset">Anzeigengruppe</th><th data-k="ad">Anzeige</th><th class="num" data-k="clicks">Klicks</th><th class="num sort" data-k="signups">Anmeldungen</th><th class="num" data-k="exact">exakt</th><th class="num" data-k="rate">Quote</th></tr></thead><tbody></tbody></table></div><div class="m-list" id="mAds"></div></div>
  <div class="card"><header><h2>Letzte Anmeldungen</h2><span>neueste zuerst, Daten maskiert</span></header>
   <div class="wrap"><table id="tRecent"><thead><tr><th>Zeit</th><th>Name</th><th>Tel</th><th>Sprache</th><th>Quelle</th><th>Kampagne · Anzeigengruppe · Anzeige</th><th>Zuordnung</th></tr></thead><tbody></tbody></table></div><div class="m-list" id="mRecent"></div></div>
- <p class="foot">Daten aus der eigenen Middleware: Klicks auf den WhatsApp-Button der Passwortseite und WhatsApp-Anmeldungen. Zuordnung "exakt" = ueber den Vorlagentext, "wahrscheinlich" = letzter Klick im 15-Minuten-Fenster. Google liefert nur IDs, die Namen werden ueber die Anzeigen-Namensliste aufgeloest (<span id="gNames">–</span>). Zeiten Europe/Berlin. Aktualisierung alle 30 Sekunden.</p>
+ <p class="foot">Daten aus der eigenen Middleware: Klicks auf den WhatsApp-Button der Passwortseite und WhatsApp-Anmeldungen. Zuordnung "exakt" = ueber den Vorlagentext, "wahrscheinlich" = letzter Klick im 15-Minuten-Fenster. Google liefert nur IDs, die Namen werden ueber die Anzeigen-Namensliste aufgeloest (<span id="gNames">–</span>). Zeiten Europe/Berlin. Aktualisierung alle 30 Sekunden. <a href="#" id="chg">Zugang aendern</a></p>
 </main>
 <script>
 const API='https://upammkefrgjsviaxbaun.supabase.co/functions/v1/drop-report';
@@ -152,7 +152,7 @@ function setRange(r){range=r;LS('pdr_range',r);$$('#seg button').forEach(b=>b.se
 $$('#seg button').forEach(b=>b.onclick=()=>setRange(b.dataset.r));
 $('#apply').onclick=()=>{from=$('#from').value;to=$('#to').value;if(!from||!to)return;LS('pdr_from',from);LS('pdr_to',to);load(true)};
 $('#from').value=from;$('#to').value=to;
-$('#gear').onclick=()=>$('#pop').classList.toggle('on');$('#save').onclick=()=>{LS('pdr_token',$('#tok').value.trim());$('#pop').classList.remove('on');load(true)};
+$('#gear').onclick=()=>$('#pop').classList.toggle('on');$('#chg').onclick=e=>{e.preventDefault();LS('pdr_token','');gate(true)};$('#save').onclick=()=>{LS('pdr_token',$('#tok').value.trim());$('#pop').classList.remove('on');load(true)};
 // Live-Refresh
 const EVERY=30;let left=EVERY,last=null,seq=0;
 setInterval(()=>{left--;$('#ringFg').style.strokeDashoffset=44*(1-left/EVERY);if(left<=0){left=EVERY;load()}},1000);
