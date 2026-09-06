@@ -136,10 +136,10 @@ tr.new td{animation:flash 2.4s both}@keyframes flash{0%{background:rgba(31,157,8
 <script>
 const API='https://upammkefrgjsviaxbaun.supabase.co/functions/v1/drop-report';
 const $=s=>document.querySelector(s);const $$=s=>[...document.querySelectorAll(s)];
-const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+const MEM={};const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)??MEM[k]??null;MEM[k]=v;localStorage.setItem(k,v)}catch(e){if(v!==undefined)MEM[k]=v;return MEM[k]??null}};
 function tok(){try{const h=new URLSearchParams(location.hash.slice(1)).get('token')||new URLSearchParams(location.search).get('token');if(h){LS('pdr_token',h);history.replaceState(null,'',location.pathname)}}catch(e){}return LS('pdr_token')||''}
 function gate(on,bad){$('#gate').hidden=!on;$('#top').hidden=on;$('main').hidden=on;$('#gbad').style.display=bad?'block':'none';if(on)setTimeout(()=>$('#gtok').focus(),50)}
-$('#gopen').onclick=()=>{const v=$('#gtok').value.trim();if(!v)return;LS('pdr_token',v);gate(false);load(true)};$('#gtok').addEventListener('keydown',e=>{if(e.key==='Enter')$('#gopen').click()});
+$('#gopen').onclick=()=>{const v=$('#gtok').value.trim().replace(/^.*token=/,'');if(!v)return;LS('pdr_token',v);$('#gopen').textContent='Pruefe …';load(true).finally(()=>{$('#gopen').textContent='Reporting oeffnen'})};$('#gtok').addEventListener('keydown',e=>{if(e.key==='Enter')$('#gopen').click()});
 const fmtT=iso=>new Date(iso).toLocaleString('de-DE',{timeZone:'Europe/Berlin',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
 const fmtD=d=>d.slice(8)+'.'+d.slice(5,7)+'.'+d.slice(0,4);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
