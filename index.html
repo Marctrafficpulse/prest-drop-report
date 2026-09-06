@@ -95,7 +95,7 @@ tr.new td{animation:flash 2.4s both}@keyframes flash{0%{background:rgba(31,157,8
 }
 
 /* Zugangs-Ansicht (ohne Token): zentrierte Karte statt Fehlertext */
-#gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+#gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}#gate[hidden],#top[hidden],main[hidden]{display:none!important}
 #gate .g{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 26px;box-shadow:0 20px 60px rgba(0,0,0,.08);animation:rise .5s both}
 #gate h1{margin:0;font-size:15px;letter-spacing:.2em;text-transform:uppercase}#gate p{color:var(--mut);font-size:13px;margin:6px 0 20px}
 #gate label{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:6px}
