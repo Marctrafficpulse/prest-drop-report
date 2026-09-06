@@ -91,6 +91,9 @@ tr.new td{animation:flash 2.4s both}@keyframes flash{0%{background:rgba(31,157,8
  .mi .m{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-family:var(--mono);font-size:12px;min-width:0}.mi .m b{font-weight:500}.mi .m span{color:var(--mut)}
  .mi .bar{width:100%;display:block;margin:6px 0 0;height:5px;background:var(--line);border-radius:3px;overflow:hidden}.mi .bar i{display:block;height:100%;background:var(--ink)}
  .mi.new{animation:flash 2.4s both}
+}
+#issues .mi{border-bottom:1px solid #f3c9a7}#issues .mi:last-child{border-bottom:0}#issues .t{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}#issues .n{font-weight:600}#issues .s{font-size:12px;color:var(--mut);margin-top:2px;overflow-wrap:anywhere}
+@media(max-width:640px){
  .rw{display:grid;grid-template-columns:110px 1fr;gap:8px;font-size:12.5px;padding:3px 0;border-top:1px dashed var(--line)}.rw:first-of-type{border-top:0}.rw .k{color:var(--mut);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding-top:2px}.rw .m{flex-wrap:wrap;gap:4px 10px;min-width:0}#mDay .rw{grid-template-columns:64px 1fr}.rw span:last-child{overflow-wrap:anywhere}
  .foot{font-size:11px}
 }
@@ -118,6 +121,7 @@ tr.new td{animation:flash 2.4s both}@keyframes flash{0%{background:rgba(31,157,8
 <main>
  <div id="err" role="alert"></div>
  <div class="period"><b id="pTitle">Lade …</b><span id="pSub"></span><span id="hid" class="mut" style="font-family:var(--mono);font-size:12px"></span></div>
+ <div id="issues" class="card" hidden style="margin:0 0 14px;border-color:#f3c9a7;background:#fff8f1"><header><h2 style="color:var(--warn)">Anzeigen ohne URL-Parameter</h2><span>Klicks daraus kommen nur mit Klick-ID an und landen unter "ohne URL-Parameter"</span></header><div id="issuesList"></div></div>
  <div class="kpis" id="kpis">
   <div class="kpi hero"><label>Anmeldungen gesamt</label><b><span class="skel" style="width:60px;display:inline-block"></span></b></div>
   <div class="kpi"><label>Im Zeitraum</label><b>&nbsp;</b></div><div class="kpi"><label>Deutsch</label><b>&nbsp;</b></div><div class="kpi"><label>Englisch</label><b>&nbsp;</b></div><div class="kpi"><label>Button-Klicks</label><b>&nbsp;</b></div><div class="kpi"><label>Klick zu Anmeldung</label><b>&nbsp;</b></div>
@@ -190,6 +194,7 @@ function render(d,reset){const s=d.summary;const q=s.clicks_period?Math.round(s.
  const ch=Object.entries(d.by_channel).sort((a,b)=>b[1].signups-a[1].signups);const tot=Math.max(1,ch.reduce((a,[,v])=>a+v.signups,0));
  $('#tChan tbody').innerHTML=ch.map(([k,v])=>`<tr><td>${srcCell(k)}</td><td class="num">${n(v.clicks)}</td><td class="num"><b>${n(v.signups)}</b></td><td class="num">${v.clicks?Math.round(v.signups/v.clicks*100)+' %':'–'}</td><td class="num">${eur(v.spend)}</td><td class="num"><b>${eur(v.cpl)}</b></td><td><span class="bar" style="width:${Math.round(v.signups/tot*140)}px"></span><span class="mono">${Math.round(v.signups/tot*100)} %</span></td></tr>`).join('')||`<tr><td colspan=7 class="empty">Noch keine Daten im Zeitraum</td></tr>`;
  $('#mChan').innerHTML=ch.map(([k,v])=>`<div class="mi"><div class="t">${srcCell(k)}<b style="font-family:var(--mono)">${n(v.signups)}</b></div><div class="m"><span>Klicks</span><b>${n(v.clicks)}</b><span>Quote</span><b>${v.clicks?Math.round(v.signups/v.clicks*100)+' %':'–'}</b><span>Ausgaben</span><b>${eur(v.spend)}</b><span>CPL</span><b>${eur(v.cpl)}</b></div><span class="bar"><i style="width:${Math.round(v.signups/tot*100)}%"></i></span></div>`).join('')||'<div class="empty">Noch keine Daten im Zeitraum</div>';
+ const iss=d.issues||[];$('#issues').hidden=!iss.length;$('#issuesList').innerHTML=iss.map(i=>`<div class="mi" style="padding:8px 0"><div class="t"><span class="n">${esc(i.ad||'')}</span>${srcCell(i.channel)}</div><div class="s">${esc(i.campaign||'')} · ${esc(i.adset||'')}</div><div class="s">Fix: Werbeanzeigenmanager > Anzeige bearbeiten > URL-Parameter: utm_source=meta&amp;utm_campaign={{campaign.name}}&amp;utm_term={{adset.name}}&amp;utm_content={{ad.name}}</div></div>`).join('');
  ads=d.breakdown;drawAds();
  // Je Tag je Quelle
  const ORD=['Meta Ads','Google Ads','TikTok Ads','Website/organisch','Direkt'];const dc=d.by_day_channel||{};const dks=Object.keys(dc).sort().reverse();
